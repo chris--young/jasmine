@@ -102,7 +102,7 @@ getJasmineRequireObj().QueueRunner = function(j$) {
         }),
         errored = false,
         queueableFn = self.queueableFns[iterativeIndex],
-        timeoutId;
+        timeoutId = {};
 
       next.fail = function() {
         self.fail.apply(null, arguments);

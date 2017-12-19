@@ -1,3 +1,9 @@
+try {
+  var NODE_JS = typeof process.versions.node === 'string';
+} catch (e) {
+  var NODE_JS = false;
+}
+
 describe("Clock", function() {
 
   it("does not replace setTimeout until it is installed", function() {
@@ -312,12 +318,12 @@ describe("Clock", function() {
       delayedFn = jasmine.createSpy('delayedFn'),
       mockDate = { install: function() {}, tick: function() {}, uninstall: function() {} },
       clock = new jasmineUnderTest.Clock(fakeGlobal, function () { return delayedFunctionScheduler; }, mockDate),
-      timeoutId;
+      timeout;
 
     clock.install();
-    timeoutId = clock.setTimeout(delayedFn, 0);
+    timeout = clock.setTimeout(delayedFn, 0);
 
-    expect(timeoutId).toEqual(123);
+    expect(NODE_JS ? timeout.id : timeout).toEqual(123);
   });
 
   it("clears the scheduled function with the scheduler", function() {
@@ -329,7 +335,7 @@ describe("Clock", function() {
       clock = new jasmineUnderTest.Clock(fakeGlobal, function () { return delayedFunctionScheduler; }, mockDate);
 
     clock.install();
-    clock.clearTimeout(123);
+    clock.clearTimeout(NODE_JS ? { id: 123 } : 123);
 
     expect(fakeClearTimeout).not.toHaveBeenCalled();
     expect(delayedFunctionScheduler.removeFunctionWithId).toHaveBeenCalledWith(123);
@@ -360,12 +366,12 @@ describe("Clock", function() {
       delayedFn = jasmine.createSpy('delayedFn'),
       mockDate = { install: function() {}, tick: function() {}, uninstall: function() {} },
       clock = new jasmineUnderTest.Clock(fakeGlobal, function () { return delayedFunctionScheduler; }, mockDate),
-      intervalId;
+      interval;
 
     clock.install();
-    intervalId = clock.setInterval(delayedFn, 0);
+    interval = clock.setInterval(delayedFn, 0);
 
-    expect(intervalId).toEqual(123);
+    expect(NODE_JS ? interval.id : interval).toEqual(123);
   });
 
   it("clears the scheduled function with the scheduler", function() {
@@ -377,7 +383,7 @@ describe("Clock", function() {
       clock = new jasmineUnderTest.Clock(fakeGlobal, function () { return delayedFunctionScheduler; }, mockDate);
 
     clock.install();
-    clock.clearInterval(123);
+    clock.clearInterval(NODE_JS ? { id: 123 } : 123);
 
     expect(clearInterval).not.toHaveBeenCalled();
     expect(delayedFunctionScheduler.removeFunctionWithId).toHaveBeenCalledWith(123);

@@ -1,3 +1,9 @@
+try {
+  var NODE_JS = typeof process.versions.node === 'string';
+} catch (e) {
+  var NODE_JS = false;
+}
+
 getJasmineRequireObj().Clock = function() {
   /**
    * _Note:_ Do not construct this directly, Jasmine will make one during booting. You can get the current clock with {@link jasmine.clock}.
@@ -145,19 +151,23 @@ getJasmineRequireObj().Clock = function() {
     }
 
     function setTimeout(fn, delay) {
-      return delayedFunctionScheduler.scheduleFunction(fn, delay, argSlice(arguments, 2));
+      var id = delayedFunctionScheduler.scheduleFunction(fn, delay, argSlice(arguments, 2));
+
+      return NODE_JS ? new Timeout(id) : id;
     }
 
-    function clearTimeout(id) {
-      return delayedFunctionScheduler.removeFunctionWithId(id);
+    function clearTimeout(timeout) {
+      return delayedFunctionScheduler.removeFunctionWithId(NODE_JS ? timeout.id : timeout);
     }
 
     function setInterval(fn, interval) {
-      return delayedFunctionScheduler.scheduleFunction(fn, interval, argSlice(arguments, 2), true);
+      var id = delayedFunctionScheduler.scheduleFunction(fn, interval, argSlice(arguments, 2), true);
+
+      return NODE_JS ? new Timeout(id) : id;
     }
 
-    function clearInterval(id) {
-      return delayedFunctionScheduler.removeFunctionWithId(id);
+    function clearInterval(timeout) {
+      return delayedFunctionScheduler.removeFunctionWithId(NODE_JS ? timeout.id : timeout);
     }
 
     function argSlice(argsObj, n) {
@@ -166,4 +176,19 @@ getJasmineRequireObj().Clock = function() {
   }
 
   return Clock;
+};
+
+/**
+ * Stubs Node.js Timeout class
+ */
+function Timeout(id) {
+  this.id = id;
+}
+
+Timeout.prototype.ref = function () {
+  return this;
+};
+
+Timeout.prototype.unref = function () {
+  return this;
 };
